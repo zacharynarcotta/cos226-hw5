@@ -118,7 +118,6 @@ def midSquareHash(stringData):
     r = len(str(HASH_TABLE_SIZE))
 
     k = (key // 10) % key
-    power = 1
     power = 10**r
     k = k % power
 
