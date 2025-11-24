@@ -63,6 +63,8 @@ def asciiStringHash(stringData):
         total += ord(char)
     return total
 
+# multiply each key by a random number (0, 1), then multiply by the length of the table
+# flooring the resulting value at the end
 def multiplicationHash(table, stringData):
     k = asciiStringHash(stringData)
     a = 0.51869377 # randomly picked value where 0 < a < 1
@@ -88,6 +90,8 @@ def main():
     # initialize collision counters
     titlesCollisions = 0
     quotesCollisions = 0
+    print("METHOD: MULTIPLICATION")
+    print("COLLISION METHOD: LINEAR PROBE\n")
     try:
         with open(CSV_FILE_NAME, "r", newline = "", encoding = "utf8") as csvFile:
             start = time.time()
@@ -112,11 +116,11 @@ def main():
                 movie = DataItem(line)
                 
                 # feed the appropriate field into hash function to get a 'key'
-                titleKey = asciiStringHash(movie.movieName)
-                hashIndex = titleKey % len(hashTableTitles)
-                # titleKey = multiplicationHash(hashTableTitles, movie.movieName)
-                returnVal = addToTable(hashTableTitles, movie, hashIndex, titlesCollisions)
-                # returnVal = addToTable(hashTableTitles, movie, titleKey, titlesCollisions)
+                # titleKey = asciiStringHash(movie.movieName)
+                # hashIndex = titleKey % len(hashTableTitles)
+                titleKey = multiplicationHash(hashTableTitles, movie.movieName)
+                # returnVal = addToTable(hashTableTitles, movie, hashIndex, titlesCollisions)
+                returnVal = addToTable(hashTableTitles, movie, titleKey, titlesCollisions)
 
                 if(returnVal == -1):
                     print(f"{movie} could not be inserted into table.")
@@ -152,11 +156,11 @@ def main():
                 movie = DataItem(line)
                 
                 # feed the appropriate field into hash function to get a 'key'
-                quoteKey = asciiStringHash(movie.quote)
-                hashIndex = quoteKey % len(hashTableQuotes)
-                # quoteKey = multiplicationHash(hashTableTitles, movie.quote)
-                returnVal = addToTable(hashTableQuotes, movie, hashIndex, quotesCollisions)
-                # returnVal = addToTable(hashTablesQuotes, movie, quoteKey, quotesCollisions)
+                # quoteKey = asciiStringHash(movie.quote)
+                # hashIndex = quoteKey % len(hashTableQuotes)
+                quoteKey = multiplicationHash(hashTableTitles, movie.quote)
+                # returnVal = addToTable(hashTableQuotes, movie, hashIndex, quotesCollisions)
+                returnVal = addToTable(hashTableQuotes, movie, quoteKey, quotesCollisions)
 
                 if(returnVal == -1):
                     print(f"{movie} could not be inserted into table.")
