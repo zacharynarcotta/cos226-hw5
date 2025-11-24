@@ -5,8 +5,13 @@
 # hash.py
 # [Hash Something Out] HW
 
-import csv
+import csv, time
 CSV_FILE_NAME = "MOCK_DATA.csv"
+HASH_TABLE_SIZE = 20000
+
+# initialize hash tables
+hashTableTitles = [None] * HASH_TABLE_SIZE
+hashTableQuotes = [None] * HASH_TABLE_SIZE
 
 # holds all of the different information related to data
 class DataItem:
@@ -21,16 +26,62 @@ class DataItem:
         self.duration = int(line[6]) # in minutes
         self.production = line[7]
         self.quote = line[8]
+        
+    def __str__(self):
+        return self.movieName
 
-class HashTable:
-    pass
+# attempts to insert dataItem into table[key], handles possible collisions
+def addToTable(table, dataItem, key, collisionCount):
+    if(table[key] == None):
+        table[key] = dataItem
+        return
+    
+    # table[key] is already full ; collision!
+    collisionCount += 1
+    
+    # linear probing method
+    return linearProbe(table, dataItem, key)
 
-    # recommend: "handleCollision" function
+# returns -1 if the item could not be inserted.
+def linearProbe(table, dataItem, key):
+    for i in range(key, len(table)):
+        if(table[i] == None):
+            table[i] = dataItem
+            return
+        
+    for i in range(0, key):
+        if(table[i] == None):
+            table[i] = dataItem
+            return
+        
+    return -1
+
+def asciiStringHash(stringData):
+    total = 0
+    for char in stringData:
+        total += ord(char)
+    return total
+
+def reportTableStatistics(table, elapsed, collisionCount):
+    wastedSlots = 0
+    for i in range(len(table)):
+        if(table[i] == None):
+            wastedSlots += 1
+
+    print(f"Wasted Space (unused slots): {wastedSlots}")
+    print(f"Number of collisions during construction: {collisionCount}")
+    print(f"Construction time: {elapsed:0.3f}s\n")
+    return
 
 def main():
     counter = 0
+    
+    # initialize collision counters
+    titlesCollisions = 0
+    quotesCollisions = 0
     try:
         with open(CSV_FILE_NAME, "r", newline = "", encoding = "utf8") as csvFile:
+            start = time.time()
             reader = csv.reader(csvFile)
             for line in reader:
                 if(counter == 0):
@@ -47,18 +98,62 @@ def main():
                     if(element == None):
                         print(f"{line} has an empty field!")
                         return
-                dataItem = DataItem(line)
-                print(line)
+                
                 # create DataItem from line
+                movie = DataItem(line)
+                
                 # feed the appropriate field into hash function to get a 'key'
-                # key % len(hashTable)
-                # attempt to insert DataItem into hash table
-                # handle collisions
+                titleKey = asciiStringHash(movie.movieName)
+                hashIndex = titleKey % len(hashTableTitles)
+
+                if addToTable(hashTableTitles, movie, hashIndex, titlesCollisions) == -1:
+                    return
                 counter += 1
+            end = time.time()
+            elapsed = (end - start)
+            print("TITLE TABLE STATISTICS")
+            reportTableStatistics(hashTableTitles, elapsed, titlesCollisions)
+            
+        counter = 0
+        with open(CSV_FILE_NAME, "r", newline = "", encoding = "utf8") as csvFile:
+            start = time.time()
+            reader = csv.reader(csvFile)
+            for line in reader:
+                if(counter == 0):
+                    counter += 1
+                    continue
+                
+                # length should be 9
+                if(len(line) != 9):
+                    print(f"{line} length is invalid! {len(line)} [should be 9]")
+                    return
+                
+                # ensure every element in the line exists
+                for element in line:
+                    if(element == None):
+                        print(f"{line} has an empty field!")
+                        return
+                
+                # create DataItem from line
+                movie = DataItem(line)
+                
+                # feed the appropriate field into hash function to get a 'key'
+                quoteKey = asciiStringHash(movie.quote)
+                hashIndex = quoteKey % len(hashTableQuotes)
+
+                if addToTable(hashTableQuotes, movie, hashIndex, quotesCollisions) == -1:
+                    return
+                counter += 1
+            end = time.time()
+            elapsed = (end - start)
+            print("QUOTE TABLE STATISTICS")
+            reportTableStatistics(hashTableQuotes, elapsed, quotesCollisions)
     except FileNotFoundError as ex:
         print(f"File does not exist in main!\nException: {ex}")
     except Exception as ex:
         print(f"Unknown exception in main!\nException: {ex}")
+    finally:
+        return
 
 if(__name__ == "__main__"):
     main()
