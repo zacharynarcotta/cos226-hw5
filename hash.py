@@ -95,6 +95,21 @@ def foldingHash(key, n):
 
     return total
 
+# iterates through a string, multiplying each character ascii value 
+# by (small prime number (p) ^ num of iterations), modulo by a very large prime number (m)
+def polynomialRollingHash(stringData):
+    p = 53 # recommended prime for strings consisting of uppercase and lowercase characters
+    m = (10**9) + 9 # commonly used large prime
+
+    total = 0
+
+    for i in range(len(stringData)):
+        asciiVal = ord(stringData[i])
+        power = p**i
+        total += (asciiVal * power) % m
+
+    return total
+
 def reportTableStatistics(table, elapsed, collisionCount):
     wastedSlots = 0
     for i in range(len(table)):
@@ -116,7 +131,7 @@ def main():
     # initialize amount of folds to use for folding hash
     foldCount = 4
 
-    print("METHOD: FOLDING HASH")
+    print("METHOD: POLYNOMIAL ROLLING HASH")
     print("COLLISION METHOD: LINEAR PROBE\n")
     try:
         with open(CSV_FILE_NAME, "r", newline = "", encoding = "utf8") as csvFile:
@@ -144,9 +159,10 @@ def main():
                 # feed the appropriate field into hash function to get a 'key'
                 # titleKey = asciiStringHash(movie.movieName)
                 # hashIndex = titleKey % len(hashTableTitles)
-                titleKey = multiplicationHash(hashTableTitles, movie.movieName)
-                titleKey = foldingHash(titleKey, foldCount)
+                # titleKey = multiplicationHash(hashTableTitles, movie.movieName)
+                # titleKey = foldingHash(titleKey, foldCount)
                 # returnVal = addToTable(hashTableTitles, movie, hashIndex)
+                titleKey = polynomialRollingHash(movie.movieName) % len(hashTableTitles)
                 returnVal = addToTable(hashTableTitles, movie, titleKey)
 
                 if(returnVal == -1):
@@ -185,9 +201,10 @@ def main():
                 # feed the appropriate field into hash function to get a 'key'
                 # quoteKey = asciiStringHash(movie.quote)
                 # hashIndex = quoteKey % len(hashTableQuotes)
-                quoteKey = multiplicationHash(hashTableQuotes, movie.quote)
-                quoteKey = foldingHash(quoteKey, foldCount)
+                # quoteKey = multiplicationHash(hashTableQuotes, movie.quote)
+                # quoteKey = foldingHash(quoteKey, foldCount)
                 # returnVal = addToTable(hashTableQuotes, movie, hashIndex)
+                quoteKey = polynomialRollingHash(movie.quote) % len(hashTableQuotes)
                 returnVal = addToTable(hashTableQuotes, movie, quoteKey)
 
                 if(returnVal == -1):
