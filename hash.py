@@ -31,15 +31,24 @@ class DataItem:
         return self.movieName
 
 # attempts to insert dataItem into table[key], handles possible collisions
-def addToTable(table, dataItem, key, collisionCount):
-    if(table[key] == None):
-        table[key] = dataItem
-        return 0
+def addToTable(table, dataItem, key):
+    # linear probing method
+    # if(table[key] == None):
+    #     table[key] = dataItem
+    #     return 0
     
     # table[key] is already full ; collision!
     
-    # linear probing method
-    return linearProbe(table, dataItem, key)
+    # return linearProbe(table, dataItem, key)
+
+    # linked list method
+    if(table[key] == None):
+        table[key] = [dataItem]
+        return 0
+    
+    # table[key] is already full ; collision!
+
+    return linkedListHandling(table, dataItem, key)
 
 # returns -1 if the item could not be inserted.
 def linearProbe(table, dataItem, key):
@@ -54,6 +63,10 @@ def linearProbe(table, dataItem, key):
             return 1
         
     return -1
+
+def linkedListHandling(table, dataItem, key):
+    table[key].append(dataItem)
+    return 1
 
 # converts each character in the string into its integer ASCII value
 # sums them up, returns this value (modulo division applied later)
@@ -91,7 +104,7 @@ def main():
     titlesCollisions = 0
     quotesCollisions = 0
     print("METHOD: MULTIPLICATION")
-    print("COLLISION METHOD: LINEAR PROBE\n")
+    print("COLLISION METHOD: LINKED LIST\n")
     try:
         with open(CSV_FILE_NAME, "r", newline = "", encoding = "utf8") as csvFile:
             start = time.time()
@@ -119,8 +132,8 @@ def main():
                 # titleKey = asciiStringHash(movie.movieName)
                 # hashIndex = titleKey % len(hashTableTitles)
                 titleKey = multiplicationHash(hashTableTitles, movie.movieName)
-                # returnVal = addToTable(hashTableTitles, movie, hashIndex, titlesCollisions)
-                returnVal = addToTable(hashTableTitles, movie, titleKey, titlesCollisions)
+                # returnVal = addToTable(hashTableTitles, movie, hashIndex)
+                returnVal = addToTable(hashTableTitles, movie, titleKey)
 
                 if(returnVal == -1):
                     print(f"{movie} could not be inserted into table.")
@@ -158,9 +171,9 @@ def main():
                 # feed the appropriate field into hash function to get a 'key'
                 # quoteKey = asciiStringHash(movie.quote)
                 # hashIndex = quoteKey % len(hashTableQuotes)
-                quoteKey = multiplicationHash(hashTableTitles, movie.quote)
-                # returnVal = addToTable(hashTableQuotes, movie, hashIndex, quotesCollisions)
-                returnVal = addToTable(hashTableQuotes, movie, quoteKey, quotesCollisions)
+                quoteKey = multiplicationHash(hashTableQuotes, movie.quote)
+                # returnVal = addToTable(hashTableQuotes, movie, hashIndex)
+                returnVal = addToTable(hashTableQuotes, movie, quoteKey)
 
                 if(returnVal == -1):
                     print(f"{movie} could not be inserted into table.")
