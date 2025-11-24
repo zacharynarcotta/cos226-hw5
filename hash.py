@@ -110,6 +110,8 @@ def polynomialRollingHash(stringData):
 
     return total
 
+# squares key value (gathered from ascii addition), then extracts the middle r values of key
+# where r is the amount of digits in the largest possible index in the hash table
 def midSquareHash(stringData):
     key = asciiStringHash(stringData)
     key *= key
