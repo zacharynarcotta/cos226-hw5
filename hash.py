@@ -33,22 +33,22 @@ class DataItem:
 # attempts to insert dataItem into table[key], handles possible collisions
 def addToTable(table, dataItem, key):
     # linear probing method
-    # if(table[key] == None):
-    #     table[key] = dataItem
-    #     return 0
-    
-    # table[key] is already full ; collision!
-    
-    # return linearProbe(table, dataItem, key)
-
-    # linked list method
     if(table[key] == None):
-        table[key] = [dataItem]
+        table[key] = dataItem
         return 0
     
     # table[key] is already full ; collision!
+    
+    return linearProbe(table, dataItem, key)
 
-    return linkedListHandling(table, dataItem, key)
+    # linked list method
+    # if(table[key] == None):
+    #     table[key] = [dataItem]
+    #     return 0
+    
+    # table[key] is already full ; collision!
+
+    # return linkedListHandling(table, dataItem, key)
 
 # returns -1 if the item could not be inserted.
 def linearProbe(table, dataItem, key):
@@ -86,6 +86,15 @@ def multiplicationHash(table, stringData):
     key = math.floor((n * ((k * a) % 1)))
     return key
 
+# receives a key, groups key into groups of n, and sums them
+def foldingHash(key, n):
+    k = str(key)
+    total = 0
+    for i in range(0, len(k), n):
+        total += int(k[i:i+n])
+
+    return total
+
 def reportTableStatistics(table, elapsed, collisionCount):
     wastedSlots = 0
     for i in range(len(table)):
@@ -103,8 +112,12 @@ def main():
     # initialize collision counters
     titlesCollisions = 0
     quotesCollisions = 0
-    print("METHOD: MULTIPLICATION")
-    print("COLLISION METHOD: LINKED LIST\n")
+
+    # initialize amount of folds to use for folding hash
+    foldCount = 4
+
+    print("METHOD: FOLDING HASH")
+    print("COLLISION METHOD: LINEAR PROBE\n")
     try:
         with open(CSV_FILE_NAME, "r", newline = "", encoding = "utf8") as csvFile:
             start = time.time()
@@ -132,6 +145,7 @@ def main():
                 # titleKey = asciiStringHash(movie.movieName)
                 # hashIndex = titleKey % len(hashTableTitles)
                 titleKey = multiplicationHash(hashTableTitles, movie.movieName)
+                titleKey = foldingHash(titleKey, foldCount)
                 # returnVal = addToTable(hashTableTitles, movie, hashIndex)
                 returnVal = addToTable(hashTableTitles, movie, titleKey)
 
@@ -172,6 +186,7 @@ def main():
                 # quoteKey = asciiStringHash(movie.quote)
                 # hashIndex = quoteKey % len(hashTableQuotes)
                 quoteKey = multiplicationHash(hashTableQuotes, movie.quote)
+                quoteKey = foldingHash(quoteKey, foldCount)
                 # returnVal = addToTable(hashTableQuotes, movie, hashIndex)
                 returnVal = addToTable(hashTableQuotes, movie, quoteKey)
 
