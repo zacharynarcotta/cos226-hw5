@@ -5,7 +5,7 @@
 # hash.py
 # [Hash Something Out] HW
 
-import csv, time
+import csv, time, math
 CSV_FILE_NAME = "MOCK_DATA.csv"
 HASH_TABLE_SIZE = 20000
 
@@ -34,10 +34,9 @@ class DataItem:
 def addToTable(table, dataItem, key, collisionCount):
     if(table[key] == None):
         table[key] = dataItem
-        return
+        return 0
     
     # table[key] is already full ; collision!
-    collisionCount += 1
     
     # linear probing method
     return linearProbe(table, dataItem, key)
@@ -47,20 +46,30 @@ def linearProbe(table, dataItem, key):
     for i in range(key, len(table)):
         if(table[i] == None):
             table[i] = dataItem
-            return
+            return 1
         
     for i in range(0, key):
         if(table[i] == None):
             table[i] = dataItem
-            return
+            return 1
         
     return -1
 
+# converts each character in the string into its integer ASCII value
+# sums them up, returns this value (modulo division applied later)
 def asciiStringHash(stringData):
     total = 0
     for char in stringData:
         total += ord(char)
     return total
+
+def multiplicationHash(table, stringData):
+    k = asciiStringHash(stringData)
+    a = 0.51869377 # randomly picked value where 0 < a < 1
+    n = len(table)
+
+    key = math.floor((n * ((k * a) % 1)))
+    return key
 
 def reportTableStatistics(table, elapsed, collisionCount):
     wastedSlots = 0
@@ -105,9 +114,14 @@ def main():
                 # feed the appropriate field into hash function to get a 'key'
                 titleKey = asciiStringHash(movie.movieName)
                 hashIndex = titleKey % len(hashTableTitles)
+                # titleKey = multiplicationHash(hashTableTitles, movie.movieName)
+                returnVal = addToTable(hashTableTitles, movie, hashIndex, titlesCollisions)
+                # returnVal = addToTable(hashTableTitles, movie, titleKey, titlesCollisions)
 
-                if addToTable(hashTableTitles, movie, hashIndex, titlesCollisions) == -1:
-                    return
+                if(returnVal == -1):
+                    print(f"{movie} could not be inserted into table.")
+                elif(returnVal == 1): # collision happened
+                    titlesCollisions += 1
                 counter += 1
             end = time.time()
             elapsed = (end - start)
@@ -140,9 +154,14 @@ def main():
                 # feed the appropriate field into hash function to get a 'key'
                 quoteKey = asciiStringHash(movie.quote)
                 hashIndex = quoteKey % len(hashTableQuotes)
+                # quoteKey = multiplicationHash(hashTableTitles, movie.quote)
+                returnVal = addToTable(hashTableQuotes, movie, hashIndex, quotesCollisions)
+                # returnVal = addToTable(hashTablesQuotes, movie, quoteKey, quotesCollisions)
 
-                if addToTable(hashTableQuotes, movie, hashIndex, quotesCollisions) == -1:
-                    return
+                if(returnVal == -1):
+                    print(f"{movie} could not be inserted into table.")
+                elif(returnVal == 1): # collision happened
+                    quotesCollisions += 1
                 counter += 1
             end = time.time()
             elapsed = (end - start)
