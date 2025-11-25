@@ -7,7 +7,7 @@
 
 import csv, time, math
 CSV_FILE_NAME = "MOCK_DATA.csv"
-HASH_TABLE_SIZE = 20000
+HASH_TABLE_SIZE = 15013
 
 # initialize hash tables
 hashTableTitles = [None] * HASH_TABLE_SIZE
