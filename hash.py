@@ -1,6 +1,6 @@
 # Zachary Narcotta
 # November 13, 2025 [start]
-# November XX, 2025 [finish]
+# November 25, 2025 [finish]
 # COS226: Fall 2025
 # hash.py
 # [Hash Something Out] HW
